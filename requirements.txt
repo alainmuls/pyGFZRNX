@@ -1,0 +1,7 @@
+numpy==1.18.2
+pandas==1.0.2
+python-dateutil==2.8.1
+pytz==2019.3
+six==1.14.0
+termcolor==1.1.0
+webcolors==1.11.1

@@ -1,0 +1,34 @@
+{
+	"build_systems":
+	[
+		{
+			"env":
+			{
+				"PATH": "$PATH:/home/amuls/gpstk/bin/:/home/amuls/TURcontrol/bin:/home/amuls/bin",
+				"PYTHONPATH": "./:./am/"
+			},
+			"name": "pygfzrnx help",
+			"shell_cmd": "/home/amuls/venvmint/pyGFZRNX/bin/python /home/amuls/amPython/pyGFZRNX/pygfzrnx.py --help",
+			"syntax": "Packages/ANSIescape/ANSI.tmLanguage",
+    		// "target": "terminus_open",
+            /*  add target and syntax */
+            "target": "ansi_color_build",
+            "syntax": "Packages/ANSIescape/ANSI.sublime-syntax",
+
+			"word_wrap": "false"
+		},
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"/usr/bin/python3\" -u \"$file\""
+		}
+	],
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+	"virtualenv": "/home/amuls/venvmint/pyGFZRNX"
+}
