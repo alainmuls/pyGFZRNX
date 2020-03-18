@@ -10,6 +10,7 @@ from json import encoder
 
 import am_config as amc
 from ampyutils import location, amutils
+from gfzrnx import rnx_observation as rnxobs
 
 __author__ = 'amuls'
 
@@ -91,6 +92,9 @@ def main(argv):
     dProgs = {}
     dProgs['gfzrnx'] = location.locateProg('gfzrnx', logger)
     amc.dRTK['progs'] = dProgs
+
+    # read the header info using gfzrnx
+    rnxobs.rnxobs_header_metadata(dRnx=amc.dRTK['rinex'], dProgs=amc.dRTK['progs'], logger=logger)
 
     # show the information JSON structure
     logger.info('{func:s}: info dictionary = \n{prt!s}'.format(prt=amutils.pretty(amc.dRTK), func=cFuncName))
