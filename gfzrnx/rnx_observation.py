@@ -26,7 +26,11 @@ def rnxobs_header_metadata(dRnx: dict, dProgs:dict, logger: logging.Logger) -> d
     with open('/tmp/{obs:s}.json'.format(obs=dRnx['obs_name'])) as json_file:
         hdr_obs = json.load(json_file)
 
-    print(type(hdr_obs))
-    print(hdr_obs)
-
     return hdr_obs
+
+
+def rnxobs_metadata_parser(dObsHdr: dict, logger: logging.Logger):
+    """
+    rnxobs_metadata_parser parser useful info from the header and stores in dictionary
+    """
+    cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')

@@ -14,6 +14,24 @@ from gfzrnx import rnx_observation as rnxobs
 
 __author__ = 'amuls'
 
+class prn_action(argparse.Action):
+    def __call__(self, parser, namespace, PRNs, option_string=None):
+        for prn in PRNs:
+            if not 0 < int(prn) < 37 or prn == 'all':
+                raise argparse.ArgumentError(self, "PRNs must be in 1..36")
+        setattr(namespace, self.dest, PRNs)
+
+
+class logging_action(argparse.Action):
+    def __call__(self, parser, namespace, log_actions, option_string=None):
+        print(type(log_actions))
+        print(log_actions)
+        choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET']
+        for log_action in log_actions:
+            if log_action not in choices:
+                raise argparse.ArgumentError(self, "log_actions must be in {!s}".format(choices))
+        setattr(namespace, self.dest, log_actions)
+
 
 def treatCmdOpts(argv):
     """
@@ -28,17 +46,20 @@ def treatCmdOpts(argv):
     parser = argparse.ArgumentParser(description=helpTxt)
 
     parser.add_argument('-r', '--obsRnx', help='rinex observation file', required=True, type=str)
-    parser.add_argument('-d', '--dirRnx', help='Directory of SBF file (default {:s})'.format(colored('./', 'green')), required=False, default='.')
+    parser.add_argument('-d', '--dirRnx', help='Directory of SBF file (default {:s})'.format(colored('./', 'green')), required=False, default='.', type=str)
 
-    parser.add_argument('-o', '--obs_type', help='select observation types to plot (default {:s}'.format(colored('C', 'green')), default='C', choices=['C', 'S', 'D', 'L'], nargs='+')
+    parser.add_argument('-o', '--obs_type', help='select observation types to plot (default {:s})'.format(colored('C', 'green')), default='C', choices=['C', 'S', 'D', 'L'], nargs='+', type=str)
+    parser.add_argument('-s', '--sat_syst', help='select GNNSs (default to {:s})'.format(colored('E', 'green')), default='E', choices=['E', 'G'], nargs='+', type=str)
+    parser.add_argument('-p', '--prn', help='select PRNs (default {:s})'.format(colored('all', 'green')), action=prn_action, nargs='+')
 
-    parser.add_argument('-w', '--write_over', help='overwrite results (default False)', action='store_true', required=False)
 
-    parser.add_argument('-l', '--logging', help='specify logging level console/file (default {:s})'.format(colored('INFO DEBUG', 'green')), nargs=2, required=False, default=['INFO', 'DEBUG'], choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'])
+    parser.add_argument('-l', '--logging', help='specify logging level console/file (default {:s})'.format(colored('INFO DEBUG', 'green')), nargs=2, required=False, default=['INFO', 'DEBUG'], action=logging_action)
+
+    # parser.add_argument('-l', '--logging', help='specify logging level console/file (default {:s})'.format(colored('INFO DEBUG', 'green')), nargs=2, required=False, default=['INFO', 'DEBUG'], choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'])
 
     args = parser.parse_args()
 
-    return args.obsRnx, args.dirRnx, args.obs_type, args.write_over, args.logging
+    return args.obsRnx, args.dirRnx, args.obs_type, args.sat_syst, args.prn, args.logging
 
 
 def checkArguments(logger: logging.Logger):
@@ -75,7 +96,7 @@ def main(argv):
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
     # treat command line options
-    obsRnx, dirRnx, obs_types, overwrite, logLevels = treatCmdOpts(argv)
+    obsRnx, dirRnx, obs_types, sat_systs, prns, logLevels = treatCmdOpts(argv)
 
     # store cli parameters
     amc.dRTK = {}
@@ -86,22 +107,25 @@ def main(argv):
     dRnx['dir'] = dirRnx
     dRnx['obs_name'] = obsRnx
     dRnx['obs_types'] = obs_types
+    dRnx['sat_systs'] = sat_systs
+    dRnx['prns'] = prns
 
     amc.dRTK['rinex'] = dRnx
 
     # create logging for better debugging
     logger = amc.createLoggers(os.path.basename(__file__), dir=dirRnx, logLevels=logLevels)
-
-    # check arguments
-    checkArguments(logger=logger)
-
     # locate the gfzrnx program used for execution
     dProgs = {}
     dProgs['gfzrnx'] = location.locateProg('gfzrnx', logger)
     amc.dRTK['progs'] = dProgs
 
+    # check arguments
+    checkArguments(logger=logger)
+
     # read the header info using gfzrnx
     amc.dRTK['obs']['header'] = rnxobs.rnxobs_header_metadata(dRnx=amc.dRTK['rinex'], dProgs=amc.dRTK['progs'], logger=logger)
+    # extract parts of the rinex observation header
+    rnxobs.rnxobs_metadata_parser(dObsHdr=amc.dRTK['obs']['header'], logger=logger)
 
     # show the information JSON structure
     logger.info('{func:s}: info dictionary = \n{prt!s}'.format(prt=amutils.pretty(amc.dRTK), func=cFuncName))
