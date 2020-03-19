@@ -29,13 +29,16 @@ def treatCmdOpts(argv):
 
     parser.add_argument('-r', '--obsRnx', help='rinex observation file', required=True, type=str)
     parser.add_argument('-d', '--dirRnx', help='Directory of SBF file (default {:s})'.format(colored('./', 'green')), required=False, default='.')
-    parser.add_argument('-o', '--overwrite', help='overwrite results (default False)', action='store_true', required=False)
+
+    parser.add_argument('-o', '--obs_type', help='select observation types to plot (default {:s}'.format(colored('C', 'green')), default='C', choices=['C', 'S', 'D', 'L'], nargs='+')
+
+    parser.add_argument('-w', '--write_over', help='overwrite results (default False)', action='store_true', required=False)
 
     parser.add_argument('-l', '--logging', help='specify logging level console/file (default {:s})'.format(colored('INFO DEBUG', 'green')), nargs=2, required=False, default=['INFO', 'DEBUG'], choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'])
 
     args = parser.parse_args()
 
-    return args.obsRnx, args.dirRnx, args.overwrite, args.logging
+    return args.obsRnx, args.dirRnx, args.obs_type, args.write_over, args.logging
 
 
 def checkArguments(logger: logging.Logger):
@@ -58,10 +61,10 @@ def checkArguments(logger: logging.Logger):
         logger.info('{func:s}: changed to directory {dir:s}'.format(func=cFuncName, dir=colored('{:s}'.format(workDir), 'green')))
 
     # check existence of RINEX observation file
-    if not os.access(amc.dRTK['rinex']['obs'], os.R_OK):
-        logger.error('{func:s}: RINEX observation file {rinex:s} not accessible.\n'.format(func=cFuncName, rinex=colored('{!s}'.format(amc.dRTK['rinex']['obs']), 'red')))
+    if not os.access(amc.dRTK['rinex']['obs_name'], os.R_OK):
+        logger.error('{func:s}: RINEX observation file {rinex:s} not accessible.\n'.format(func=cFuncName, rinex=colored('{!s}'.format(amc.dRTK['rinex']['obs_name']), 'red')))
         return amc.E_FILE_NOT_EXIST
-    logger.info('{func:s}: RINEX observation file {obs:s} accessible'.format(func=cFuncName, obs=colored('{!s}'.format(amc.dRTK['rinex']['obs']), 'green')))
+    logger.info('{func:s}: RINEX observation file {obs:s} accessible'.format(func=cFuncName, obs=colored('{!s}'.format(amc.dRTK['rinex']['obs_name']), 'green')))
 
 
 def main(argv):
@@ -72,13 +75,17 @@ def main(argv):
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
     # treat command line options
-    obsRnx, dirRnx, overwrite, logLevels = treatCmdOpts(argv)
+    obsRnx, dirRnx, obs_types, overwrite, logLevels = treatCmdOpts(argv)
 
     # store cli parameters
     amc.dRTK = {}
+    dObs = {}
+    amc.dRTK['obs'] = dObs
+
     dRnx = {}
     dRnx['dir'] = dirRnx
-    dRnx['obs'] = obsRnx
+    dRnx['obs_name'] = obsRnx
+    dRnx['obs_types'] = obs_types
 
     amc.dRTK['rinex'] = dRnx
 
@@ -94,7 +101,7 @@ def main(argv):
     amc.dRTK['progs'] = dProgs
 
     # read the header info using gfzrnx
-    rnxobs.rnxobs_header_metadata(dRnx=amc.dRTK['rinex'], dProgs=amc.dRTK['progs'], logger=logger)
+    amc.dRTK['obs']['header'] = rnxobs.rnxobs_header_metadata(dRnx=amc.dRTK['rinex'], dProgs=amc.dRTK['progs'], logger=logger)
 
     # show the information JSON structure
     logger.info('{func:s}: info dictionary = \n{prt!s}'.format(prt=amutils.pretty(amc.dRTK), func=cFuncName))

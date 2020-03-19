@@ -30,5 +30,9 @@
 			"path": "."
 		}
 	],
-	"virtualenv": "/home/amuls/venvmint/pyGFZRNX"
+	"virtualenv": "/home/amuls/venvmint/pyGFZRNX",
+
+	// Set to false to ensure the last line of the file does not end in a newline
+	// character when saving
+	"ensure_newline_at_eof_on_save": true,
 }
