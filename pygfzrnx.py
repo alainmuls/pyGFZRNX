@@ -17,7 +17,6 @@ __author__ = 'amuls'
 class prn_action(argparse.Action):
     def __call__(self, parser, namespace, PRNs, option_string=None):
         for prn in PRNs:
-            print('prn = {!s}'.format(prn))
             try:
                 if not 0 < int(prn) < 37:
                     raise argparse.ArgumentError(self, "PRNs must be in 1..36 or 'all'")
@@ -34,8 +33,6 @@ class prn_action(argparse.Action):
 
 class logging_action(argparse.Action):
     def __call__(self, parser, namespace, log_actions, option_string=None):
-        print(type(log_actions))
-        print(log_actions)
         choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET']
         for log_action in log_actions:
             if log_action not in choices:
@@ -45,11 +42,19 @@ class logging_action(argparse.Action):
 
 class freq_action(argparse.Action):
     def __call__(self, parser, namespace, freqs, option_string=None):
+        print('frqs = {!s}'.format(freqs))
         for freq in freqs:
             print('freq = {!s}'.format(freq))
             if freq not in ['1', '2', '5', '6'] and freq != 'all':
                 raise argparse.ArgumentError(self, "freqs must be either 1, 2, 5, 6 or 'all'")
-        setattr(namespace, self.dest, freqs)
+        if freqs == ['all']:
+            print('all')
+            ret_freqs = ['1', '2', '5', '6']
+        else:
+            print('not all')
+            ret_freqs = freqs
+        print('ret_freqs = {!s}'.format(ret_freqs))
+        setattr(namespace, self.dest, ret_freqs)
 
 
 def treatCmdOpts(argv):

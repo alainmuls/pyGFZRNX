@@ -16,7 +16,6 @@ def rnxobs_header_metadata(dArgs: dict, dProgs:dict, logger: logging.Logger) -> 
 
     # extract the header meta data into a json structure
     cmdGFZRNX = '{prog:s} -meta basic:jsonp -finp {obs:s} -fout /tmp/{obs:s}.json'.format(prog=dProgs['gfzrnx'], obs=dArgs['obs_name'])
-    print('cmdGFZRNX = {!s}'.format(cmdGFZRNX))
     logger.info('{func:s}: Running:\n{cmd:s}'.format(func=cFuncName, cmd=colored(cmdGFZRNX, 'blue')))
 
     # run the program
@@ -58,7 +57,7 @@ def rnxobs_metadata_parser(dobs_hdr: dict, dArgs: dict, logger: logging.Logger) 
             drnx_obs[gnss]['systyp'] = [systyp for systyp in dobs_hdr['file']['systyp'][gnss] if systyp in dArgs['systyp']]
 
             # get the observation codes for this GNSS
-            drnx_obs[gnss]['sysobs'] = [sysobs for sysobs in dobs_hdr['file']['sysobs'][gnss] if sysobs[0] in dArgs['systyp']]
+            drnx_obs[gnss]['sysobs'] = [sysobs for sysobs in dobs_hdr['file']['sysobs'][gnss] if sysobs[0] in dArgs['systyp'] and sysobs[1] in dArgs['sysfrq']]
 
             # create list of possible PRNs for this GNSS
             print(dArgs['prns'])

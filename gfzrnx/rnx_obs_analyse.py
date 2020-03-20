@@ -13,7 +13,14 @@ def rnxobs_prn_obs(prn: str, dAnalyse: dict, dProgs:dict, logger: logging.Logger
     """
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
-    print('sysobs = {!s}'.format(dAnalyse['sysobs']))
+    print(amutils.pretty(dAnalyse))
+    # # extract the header meta data into a json structure
+    # cmdGFZRNX = '{prog:s} -meta basic:jsonp -finp {obs:s} -fout /tmp/{obs:s}.json'.format(prog=dProgs['gfzrnx'], obs=dArgs['obs_name'])
+    # logger.info('{func:s}: Running:\n{cmd:s}'.format(func=cFuncName, cmd=colored(cmdGFZRNX, 'blue')))
+
+    # # run the program
+    # # gfzrnx -finp data/P1710171.20O -meta basic:jsonp
+    # exeprogram.subProcessDisplayStdErr(cmd=cmdGFZRNX, verbose=False)
 
 
     pass
