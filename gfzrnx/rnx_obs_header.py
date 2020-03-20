@@ -72,4 +72,6 @@ def rnxobs_metadata_parser(dobs_hdr: dict, dArgs: dict, logger: logging.Logger) 
             txt_exam += '\n      PRNs: {prns!s}'.format(prns=', '.join(drnx_obs[gnss]['prns']))
             logger.info('{func:s}: Analysed {info:s}'.format(info=txt_exam, func=cFuncName))
 
+    logger.info('{func:s}: observables to analyse\n{analyse!s}'.format(analyse=amutils.pretty(drnx_obs), func=cFuncName))
+
     return drnx_obs

@@ -10,7 +10,7 @@ from json import encoder
 
 import am_config as amc
 from ampyutils import location, amutils
-from gfzrnx import rnx_observation as rnxobs
+from gfzrnx import rnx_obs_header, rnx_obs_analyse
 
 __author__ = 'amuls'
 
@@ -144,13 +144,23 @@ def main(argv):
     checkArguments(logger=logger)
 
     # read the header info using gfzrnx
-    amc.dRTK['info']['header'] = rnxobs.rnxobs_header_metadata(dArgs=amc.dRTK['args'], dProgs=amc.dRTK['progs'], logger=logger)
+    amc.dRTK['info']['header'] = rnx_obs_header.rnxobs_header_metadata(dArgs=amc.dRTK['args'], dProgs=amc.dRTK['progs'], logger=logger)
     # extract parts of the rinex observation header
-    amc.dRTK['analysed'] = rnxobs.rnxobs_metadata_parser(dobs_hdr=amc.dRTK['info']['header'], dArgs=amc.dRTK['args'], logger=logger)
+    amc.dRTK['analysed'] = rnx_obs_header.rnxobs_metadata_parser(dobs_hdr=amc.dRTK['info']['header'], dArgs=amc.dRTK['args'], logger=logger)
+
+    # for each PRN selected, extract the variables of same systyp in tabular output and read in a dataframe
+    for gnss in amc.dRTK['analysed']:
+        logger.info('{func:s}: start analysing GNSS {gnss:s}'.format(gnss=colored(gnss, 'green'), func=cFuncName))
+
+        for prn in amc.dRTK['analysed'][gnss]['prns']:
+            print('prn = {:s}'.format(prn))
+            rnx_obs_analyse.rnxobs_prn_obs(prn=prn, dAnalyse=amc.dRTK['analysed'][gnss], dProgs=amc.dRTK['progs'], logger=logger)
+    sys.exit(44)
+
+    # gfzrnx -finp P1710171.20O -tab_obs -fout P1710171_20O.tab -prn E09 -obs_types C1C,C5Q -tab_sep ','
 
     # show the information JSON structure
     logger.info('{func:s}: info dictionary = \n{prt!s}'.format(prt=amutils.pretty(amc.dRTK), func=cFuncName))
-
 
 if __name__ == "__main__":
     main(sys.argv)
