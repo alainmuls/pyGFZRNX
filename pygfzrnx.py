@@ -158,11 +158,8 @@ def main(argv):
         logger.info('{func:s}: start analysing GNSS {gnss:s}'.format(gnss=colored(gnss, 'green'), func=cFuncName))
 
         for prn in amc.dRTK['analysed'][gnss]['prns']:
-            print('prn = {:s}'.format(prn))
-            rnx_obs_analyse.rnxobs_prn_obs(prn=prn, dAnalyse=amc.dRTK['analysed'][gnss], dProgs=amc.dRTK['progs'], logger=logger)
+            rnx_obs_analyse.rnxobs_prn_obs(rnx_file=dArgs['obs_name'], prn=prn, dPRNObs=amc.dRTK['analysed'][gnss]['sysobs'], dProgs=amc.dRTK['progs'], logger=logger)
     sys.exit(44)
-
-    # gfzrnx -finp P1710171.20O -tab_obs -fout P1710171_20O.tab -prn E09 -obs_types C1C,C5Q -tab_sep ','
 
     # show the information JSON structure
     logger.info('{func:s}: info dictionary = \n{prt!s}'.format(prt=amutils.pretty(amc.dRTK), func=cFuncName))

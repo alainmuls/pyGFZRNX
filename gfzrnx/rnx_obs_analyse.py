@@ -7,20 +7,20 @@ import am_config as amc
 from ampyutils import  exeprogram, amutils
 
 
-def rnxobs_prn_obs(prn: str, dAnalyse: dict, dProgs:dict, logger: logging.Logger) -> dict:
+def rnxobs_prn_obs(rnx_file: str, prn: str, dPRNObs: dict, dProgs:dict, logger: logging.Logger) -> dict:
     """
     rnxobs_header_metadata reads the rinex observation file header and extracts info
     """
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
-    print(amutils.pretty(dAnalyse))
-    # # extract the header meta data into a json structure
-    # cmdGFZRNX = '{prog:s} -meta basic:jsonp -finp {obs:s} -fout /tmp/{obs:s}.json'.format(prog=dProgs['gfzrnx'], obs=dArgs['obs_name'])
-    # logger.info('{func:s}: Running:\n{cmd:s}'.format(func=cFuncName, cmd=colored(cmdGFZRNX, 'blue')))
+    logger.info('{func:s}: analysing PRN {prn:s} observations {obs:s}'.format(prn=prn, obs=', '.join(dPRNObs), func=cFuncName))
 
-    # # run the program
-    # # gfzrnx -finp data/P1710171.20O -meta basic:jsonp
-    # exeprogram.subProcessDisplayStdErr(cmd=cmdGFZRNX, verbose=False)
+    # create tabular output for this PRN
+    file_tab = '/tmp/{rnx:s}.tab'.format(rnx=rnx_file)
+    cmdGFZRNX = '{prog:s} -finp {rnx:s} -fout {out:s} -tab_obs -tab_sep "," -prn {prn:s} -obs_types={obs:s}'.format(prog=dProgs['gfzrnx'], rnx=rnx_file, out=file_tab, prn=prn, obs=','.join(dPRNObs))
+
+    print(cmdGFZRNX)
+    # gfzrnx -finp P1710171.20O -tab_obs -fout P1710171_20O.tab -prn E09 -obs_types C1C,C5Q -tab_sep ','
 
 
     pass
