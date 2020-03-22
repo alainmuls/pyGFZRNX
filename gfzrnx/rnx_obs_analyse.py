@@ -16,12 +16,16 @@ def rnxobs_prn_obs(rnx_file: str, prn: str, dPRNObs: dict, dProgs:dict, logger: 
     logger.info('{func:s}: analysing PRN {prn:s} observations {obs:s}'.format(prn=prn, obs=', '.join(dPRNObs), func=cFuncName))
 
     # create tabular output for this PRN
-    file_tab = '/tmp/{rnx:s}.tab'.format(rnx=rnx_file)
+    file_tab = '/tmp/{rnx:s}.tab'.format(rnx=rnx_file.replace('.', '_'))
     cmdGFZRNX = '{prog:s} -finp {rnx:s} -fout {out:s} -tab_obs -tab_sep "," -prn {prn:s} -obs_types={obs:s}'.format(prog=dProgs['gfzrnx'], rnx=rnx_file, out=file_tab, prn=prn, obs=','.join(dPRNObs))
 
     print(cmdGFZRNX)
-    # gfzrnx -finp P1710171.20O -tab_obs -fout P1710171_20O.tab -prn E09 -obs_types C1C,C5Q -tab_sep ','
 
+    # run the program
+    # gfzrnx -finp P1710171.20O -tab_obs -fout P1710171_20O.tab -prn E09 -obs_types C1C,C5Q -tab_sep ','
+    # exeprogram.subProcessDisplayStdErr(cmd=cmdGFZRNX, verbose=False)
+
+    # remove the temporary json file
+    os.remove(file_tab)
 
     pass
-

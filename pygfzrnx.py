@@ -42,18 +42,13 @@ class logging_action(argparse.Action):
 
 class freq_action(argparse.Action):
     def __call__(self, parser, namespace, freqs, option_string=None):
-        print('frqs = {!s}'.format(freqs))
         for freq in freqs:
-            print('freq = {!s}'.format(freq))
             if freq not in ['1', '2', '5', '6'] and freq != 'all':
                 raise argparse.ArgumentError(self, "freqs must be either 1, 2, 5, 6 or 'all'")
         if freqs == ['all']:
-            print('all')
             ret_freqs = ['1', '2', '5', '6']
         else:
-            print('not all')
             ret_freqs = freqs
-        print('ret_freqs = {!s}'.format(ret_freqs))
         setattr(namespace, self.dest, ret_freqs)
 
 
@@ -143,6 +138,7 @@ def main(argv):
     # locate the gfzrnx program used for execution
     dProgs = {}
     dProgs['gfzrnx'] = location.locateProg('gfzrnx', logger)
+    dProgs['grep'] = location.locateProg('grep', logger)
     amc.dRTK['progs'] = dProgs
 
     # check arguments
@@ -150,8 +146,10 @@ def main(argv):
 
     # read the header info using gfzrnx
     amc.dRTK['info']['header'] = rnx_obs_header.rnxobs_header_metadata(dArgs=amc.dRTK['args'], dProgs=amc.dRTK['progs'], logger=logger)
+    # get list of PRNs in RINEX obs file
+    amc.dRTK['info']['prns'] = rnx_obs_header.rnxobs_parse_prns(dArgs=amc.dRTK['args'], dProgs=amc.dRTK['progs'], logger=logger)
     # extract parts of the rinex observation header
-    amc.dRTK['analysed'] = rnx_obs_header.rnxobs_metadata_parser(dobs_hdr=amc.dRTK['info']['header'], dArgs=amc.dRTK['args'], logger=logger)
+    amc.dRTK['analysed'] = rnx_obs_header.rnxobs_metadata_parser(dobs_hdr=amc.dRTK['info']['header'], dPRNs=amc.dRTK['info']['prns'], dArgs=amc.dRTK['args'], logger=logger)
 
     # for each PRN selected, extract the variables of same systyp in tabular output and read in a dataframe
     for gnss in amc.dRTK['analysed']:
@@ -159,6 +157,7 @@ def main(argv):
 
         for prn in amc.dRTK['analysed'][gnss]['prns']:
             rnx_obs_analyse.rnxobs_prn_obs(rnx_file=dArgs['obs_name'], prn=prn, dPRNObs=amc.dRTK['analysed'][gnss]['sysobs'], dProgs=amc.dRTK['progs'], logger=logger)
+
     sys.exit(44)
 
     # show the information JSON structure
