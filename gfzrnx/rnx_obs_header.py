@@ -63,7 +63,7 @@ def rnxobs_parse_prns(dArgs: dict, dProgs:dict, logger: logging.Logger) -> list:
     return lstPRNS
 
 
-def rnxobs_metadata_parser(dobs_hdr: dict, dPRNs: dict, dArgs: dict, logger: logging.Logger) -> dict:
+def rnxobs_metadata_parser(dobs_hdr: dict, dPRNs: dict, dArgs: dict, logger: logging.Logger):
     """
     rnxobs_metadata_parser parser useful info from the header and stores in dictionary
     """
@@ -73,7 +73,6 @@ def rnxobs_metadata_parser(dobs_hdr: dict, dPRNs: dict, dArgs: dict, logger: log
     drnx_obs = {}
 
     # get the GNSSs cavailable
-    rnx_info = []
     GNSSs = list(dobs_hdr['file']['satsys'])
     for gnss in GNSSs:
         # create info text to inform user what is available
@@ -85,6 +84,19 @@ def rnxobs_metadata_parser(dobs_hdr: dict, dPRNs: dict, dArgs: dict, logger: log
         txt_info += '\n      PRNs (#{nbr:d}): {prns!s}'.format(prns=', '.join(gnss_prns), nbr=len(gnss_prns))
         logger.info('{func:s}: Available {info:s}'.format(info=txt_info, func=cFuncName))
 
+
+def rnxobs_argument_parser(dobs_hdr: dict, dPRNs: dict, dArgs: dict, logger: logging.Logger) -> dict:
+    """
+    rnxobs_metadata_parser parser useful info from the header and stores in dictionary
+    """
+    cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
+
+    # dictionary containing relevant info
+    drnx_obs = {}
+
+    # get the GNSSs cavailable
+    GNSSs = list(dobs_hdr['file']['satsys'])
+    for gnss in GNSSs:
         if gnss in dArgs['gnss']:
             drnx_obs[gnss] = {}
 

@@ -67,10 +67,10 @@ def treatCmdOpts(argv):
     parser.add_argument('-r', '--obsRnx', help='rinex observation file', required=True, type=str)
     parser.add_argument('-d', '--dirRnx', help='Directory of SBF file (default {:s})'.format(colored('./', 'green')), required=False, default='.', type=str)
 
-    parser.add_argument('-o', '--obs_type', help='select observation types to plot (default {:s})'.format(colored('C', 'green')), default='C', choices=['C', 'S', 'D', 'L'], nargs='+', type=str)
-    parser.add_argument('-s', '--sat_syst', help='select GNNSs (default to {:s})'.format(colored('E', 'green')), default='E', choices=['E', 'G'], nargs='+', type=str)
-    parser.add_argument('-f', '--freqs', help='select frequency bands (default to {:s})'.format(colored('all', 'green')), default='all', nargs='+', action=freq_action)
-    parser.add_argument('-p', '--prn', help='select PRNs (default {:s})'.format(colored('all', 'green')), default='all', action=prn_action, nargs='+')
+    # parser.add_argument('-o', '--obs_type', help='select observation types to plot (default {:s})'.format(colored('C', 'green')), default='C', choices=['C', 'S', 'D', 'L'], nargs='+', type=str)
+    # parser.add_argument('-s', '--sat_syst', help='select GNNSs (default to {:s})'.format(colored('E', 'green')), default='E', choices=['E', 'G'], nargs='+', type=str)
+    # parser.add_argument('-f', '--freqs', help='select frequency bands (default to {:s})'.format(colored('all', 'green')), default='all', nargs='+', action=freq_action)
+    # parser.add_argument('-p', '--prn', help='select PRNs (default {:s})'.format(colored('all', 'green')), default='all', action=prn_action, nargs='+')
 
 
     parser.add_argument('-l', '--logging', help='specify logging level console/file (default {:s})'.format(colored('INFO DEBUG', 'green')), nargs=2, required=False, default=['INFO', 'DEBUG'], action=logging_action)
@@ -79,7 +79,7 @@ def treatCmdOpts(argv):
 
     args = parser.parse_args()
 
-    return args.obsRnx, args.dirRnx, args.obs_type, args.sat_syst, args.freqs, args.prn, args.logging
+    return args.obsRnx, args.dirRnx, args.logging
 
 
 def checkArguments(logger: logging.Logger):
@@ -116,7 +116,7 @@ def main(argv):
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
     # treat command line options
-    obsRnx, dirRnx, obs_types, sat_systs, frequencies, prns, logLevels = treatCmdOpts(argv)
+    obsRnx, dirRnx, logLevels = treatCmdOpts(argv)
 
     # store cli parameters
     amc.dRTK = {}
@@ -126,10 +126,6 @@ def main(argv):
     dArgs = {}
     dArgs['dir'] = dirRnx
     dArgs['obs_name'] = obsRnx
-    dArgs['gnss'] = sat_systs
-    dArgs['systyp'] = obs_types
-    dArgs['sysfrq'] = frequencies
-    dArgs['prns'] = prns
 
     amc.dRTK['args'] = dArgs
 
@@ -149,17 +145,7 @@ def main(argv):
     # get list of PRNs in RINEX obs file
     amc.dRTK['info']['prns'] = rnx_obs_header.rnxobs_parse_prns(dArgs=amc.dRTK['args'], dProgs=amc.dRTK['progs'], logger=logger)
     # extract parts of the rinex observation header
-    amc.dRTK['available'] = rnx_obs_header.rnxobs_metadata_parser(dobs_hdr=amc.dRTK['info']['header'], dPRNs=amc.dRTK['info']['prns'], dArgs=amc.dRTK['args'], logger=logger)
-    amc.dRTK['analysed'] = rnx_obs_header.rnxobs_argument_parser(dobs_hdr=amc.dRTK['info']['header'], dPRNs=amc.dRTK['info']['prns'], dArgs=amc.dRTK['args'], logger=logger)
-
-    # for each PRN selected, extract the variables of same systyp in tabular output and read in a dataframe
-    for gnss in amc.dRTK['analysed']:
-        logger.info('{func:s}: start analysing GNSS {gnss:s}'.format(gnss=colored(gnss, 'green'), func=cFuncName))
-
-        for prn in amc.dRTK['analysed'][gnss]['prns']:
-            rnx_obs_analyse.rnxobs_prn_obs(rnx_file=dArgs['obs_name'], prn=prn, dPRNObs=amc.dRTK['analysed'][gnss]['sysobs'], dProgs=amc.dRTK['progs'], logger=logger)
-
-    sys.exit(44)
+    rnx_obs_header.rnxobs_metadata_parser(dobs_hdr=amc.dRTK['info']['header'], dPRNs=amc.dRTK['info']['prns'], dArgs=amc.dRTK['args'], logger=logger)
 
     # show the information JSON structure
     logger.info('{func:s}: info dictionary = \n{prt!s}'.format(prt=amutils.pretty(amc.dRTK), func=cFuncName))
