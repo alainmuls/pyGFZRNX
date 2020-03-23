@@ -52,6 +52,14 @@ class freq_action(argparse.Action):
         setattr(namespace, self.dest, ret_freqs)
 
 
+class interval_action(argparse.Action):
+    def __call__(self, parser, namespace, interval, option_string=None):
+        if 120 <= interval <= 1800:
+            setattr(namespace, self.dest, interval)
+        else:
+            raise argparse.ArgumentError(self, "interval must be in [120 .. 1800] seconds")
+
+
 def treatCmdOpts(argv):
     """
     Treats the command line options and sets the global variables according to the CLI args
@@ -59,7 +67,7 @@ def treatCmdOpts(argv):
     :param argv: the options (without argv[0])
     :type argv: list of string
     """
-    helpTxt = os.path.basename(__file__) + ' reads RINEX observation files and creates / plots observables (or comparisons)'
+    helpTxt = os.path.basename(__file__) + ' reads 1 RINEX observation file and creates / plots observables (including differences)'
 
     # create the parser for command line arguments
     parser = argparse.ArgumentParser(description=helpTxt)
@@ -72,6 +80,7 @@ def treatCmdOpts(argv):
     parser.add_argument('-f', '--freqs', help='select frequency bands (default to {:s})'.format(colored('all', 'green')), default='all', nargs='+', action=freq_action)
     parser.add_argument('-p', '--prn', help='select PRNs (default {:s})'.format(colored('all', 'green')), default='all', action=prn_action, nargs='+')
 
+    parser.add_argument('-i', '--interval', help='interval in sec for scanning observation file (default {interval:s} s)'.format(interval=colored(600, 'green')), default=600, type=int, required=False, action=interval_action)
 
     parser.add_argument('-l', '--logging', help='specify logging level console/file (default {:s})'.format(colored('INFO DEBUG', 'green')), nargs=2, required=False, default=['INFO', 'DEBUG'], action=logging_action)
 
@@ -79,7 +88,7 @@ def treatCmdOpts(argv):
 
     args = parser.parse_args()
 
-    return args.obsRnx, args.dirRnx, args.obs_type, args.sat_syst, args.freqs, args.prn, args.logging
+    return args.obsRnx, args.dirRnx, args.obs_type, args.sat_syst, args.freqs, args.prn, args.interval, args.logging
 
 
 def checkArguments(logger: logging.Logger):
@@ -116,7 +125,7 @@ def main(argv):
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
     # treat command line options
-    obsRnx, dirRnx, obs_types, sat_systs, frequencies, prns, logLevels = treatCmdOpts(argv)
+    obsRnx, dirRnx, obs_types, sat_systs, frequencies, prns, interval, logLevels = treatCmdOpts(argv)
 
     # store cli parameters
     amc.dRTK = {}
@@ -130,6 +139,7 @@ def main(argv):
     dArgs['systyp'] = obs_types
     dArgs['sysfrq'] = frequencies
     dArgs['prns'] = prns
+    dArgs['interval'] = interval
 
     amc.dRTK['args'] = dArgs
 
