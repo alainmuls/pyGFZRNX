@@ -49,11 +49,13 @@ def rnxobs_parse_prns(dArgs: dict, dProgs:dict, logger: logging.Logger) -> list:
 
     # extract the PRNs which are last elements in lines starting with STE
     lstPRNS = []
+    logger.info('{func:s}: display of observation time span')
     with open(file_prns) as f:
         for line in f:
             # print('{line:s} -- {STE!s}'.format(line=line, STE=line.startswith(' STE')))
             if line.startswith(' STE'):
                 lstPRNS.append(line.split('|')[-1].strip())
+            logger.info(line[:-1])
 
     logger.info('{func:s}: list of PRNs with observations\n   {prns!s}'.format(prns=', '.join(lstPRNS), func=cFuncName))
 

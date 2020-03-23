@@ -52,6 +52,14 @@ class freq_action(argparse.Action):
         setattr(namespace, self.dest, ret_freqs)
 
 
+class interval_action(argparse.Action):
+    def __call__(self, parser, namespace, interval, option_string=None):
+        if 120 <= interval <= 1800:
+            setattr(namespace, self.dest, interval)
+        else:
+            raise argparse.ArgumentError(self, "interval must be in [120 .. 1800] seconds")
+
+
 def treatCmdOpts(argv):
     """
     Treats the command line options and sets the global variables according to the CLI args
@@ -59,13 +67,14 @@ def treatCmdOpts(argv):
     :param argv: the options (without argv[0])
     :type argv: list of string
     """
-    helpTxt = os.path.basename(__file__) + ' reads RINEX observation files and creates / plots observables (or comparisons)'
+    helpTxt = os.path.basename(__file__) + ' reads RINEX observation files and lists available information'
 
     # create the parser for command line arguments
     parser = argparse.ArgumentParser(description=helpTxt)
 
     parser.add_argument('-r', '--obsRnx', help='rinex observation file', required=True, type=str)
     parser.add_argument('-d', '--dirRnx', help='Directory of SBF file (default {:s})'.format(colored('./', 'green')), required=False, default='.', type=str)
+    parser.add_argument('-i', '--interval', help='interval in sec for scanning observation file (default {interval:s} s)'.format(interval=colored(600, 'green')), default=600, type=int, required=False, action=interval_action)
 
     # parser.add_argument('-o', '--obs_type', help='select observation types to plot (default {:s})'.format(colored('C', 'green')), default='C', choices=['C', 'S', 'D', 'L'], nargs='+', type=str)
     # parser.add_argument('-s', '--sat_syst', help='select GNNSs (default to {:s})'.format(colored('E', 'green')), default='E', choices=['E', 'G'], nargs='+', type=str)
