@@ -338,3 +338,35 @@ def pretty(value, htchar='\t', lfchar='\n', indent=0):
         return '(%s)' % (','.join(items) + lfchar + htchar * indent)
     else:
         return repr(value)
+
+
+def delete_lines(original_file: str, lst_line_number: list):
+    """
+    Delete lines from a file where line number  is in given list
+    """
+    is_skipped = False
+    current_index = 1
+    dummy_file = original_file + '.bak'
+
+    # print('lst_line_number = {!s}'.format(lst_line_number))
+    # print('type lst_line_number = {!s}'.format(type(lst_line_number)))
+
+    # Open original file in read only mode and dummy file in write mode
+    with open(original_file, 'r') as read_obj, open(dummy_file, 'w') as write_obj:
+        # Line by line copy data from original file to dummy file
+        for line in read_obj:
+            # If current line number matches the given line number then skip copying
+            # print('true = {!s}'.format(current_index in lst_line_number))
+            if not current_index in lst_line_number:
+                write_obj.write(line)
+            else:
+                is_skipped = True
+
+            current_index += 1
+
+    # If any line is skipped then rename dummy file as original file
+    if is_skipped:
+        os.remove(original_file)
+        os.rename(dummy_file, original_file)
+    else:
+        os.remove(dummy_file)

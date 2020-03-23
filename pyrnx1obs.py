@@ -164,12 +164,12 @@ def main(argv):
 
     # for each PRN selected, extract the variables of same systyp in tabular output and read in a dataframe
     for gnss in amc.dRTK['analysed']:
+        logger.info('=' * 50)
         logger.info('{func:s}: start analysing GNSS {gnss:s}'.format(gnss=colored(gnss, 'green'), func=cFuncName))
 
         for prn in amc.dRTK['analysed'][gnss]['prns']:
-            rnx_obs_analyse.rnxobs_prn_obs(rnx_file=dArgs['obs_name'], prn=prn, dPRNObs=amc.dRTK['analysed'][gnss]['sysobs'], dProgs=amc.dRTK['progs'], logger=logger)
-
-    sys.exit(44)
+            logger.info('-' * 25)
+            dfPRN = rnx_obs_analyse.rnxobs_prn_obs(rnx_file=dArgs['obs_name'], prn=prn, dPRNObs=amc.dRTK['analysed'][gnss]['sysobs'], dProgs=amc.dRTK['progs'], logger=logger)
 
     # show the information JSON structure
     logger.info('{func:s}: info dictionary = \n{prt!s}'.format(prt=amutils.pretty(amc.dRTK), func=cFuncName))

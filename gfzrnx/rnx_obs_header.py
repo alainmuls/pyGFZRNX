@@ -3,6 +3,7 @@ import sys
 import logging
 from termcolor import colored
 import json
+import uuid
 
 import am_config as amc
 from ampyutils import  exeprogram, amutils
@@ -15,19 +16,20 @@ def rnxobs_header_metadata(dArgs: dict, dProgs:dict, logger: logging.Logger) -> 
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
     # extract the header meta data into a json structure
-    file_json = '/tmp/{rnx:s}.json'.format(rnx=dArgs['obs_name'].replace('.', '_'))
-    cmdGFZRNX = '{prog:s} -meta basic:jsonp -finp {obs:s} -fout {json:s}'.format(prog=dProgs['gfzrnx'], obs=dArgs['obs_name'], json=file_json)
+    json_name = '/tmp/{tmpname:s}.json'.format(tmpname=uuid.uuid4().hex)
+
+    cmdGFZRNX = '{prog:s} -meta basic:jsonp -finp {obs:s} -fout {json:s}'.format(prog=dProgs['gfzrnx'], obs=dArgs['obs_name'], json=json_name)
     logger.info('{func:s}: Running:\n{cmd:s}'.format(func=cFuncName, cmd=colored(cmdGFZRNX, 'blue')))
 
     # run the program
     # gfzrnx -finp data/P1710171.20O -meta basic:jsonp
     exeprogram.subProcessDisplayStdErr(cmd=cmdGFZRNX, verbose=False)
 
-    with open(file_json) as json_file:
+    with open(json_name) as json_file:
         hdr_obs = json.load(json_file)
 
     # remove the temporary json file
-    os.remove(file_json)
+    os.remove(json_name)
 
     return hdr_obs
 
@@ -38,9 +40,9 @@ def rnxobs_parse_prns(dArgs: dict, dProgs:dict, logger: logging.Logger) -> list:
     """
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
-    file_prns = '/tmp/{rnx:s}.prns'.format(rnx=dArgs['obs_name'].replace('.', '_'))
+    prns_name = '/tmp/{tmpname:s}.prns'.format(tmpname=uuid.uuid4().hex)
 
-    cmdGFZRNX = '{prog:s} -stk_epo {interval:d} -finp {obs:s} -fout {prns:s}'.format(prog=dProgs['gfzrnx'], interval=dArgs['interval'], obs=dArgs['obs_name'], prns=file_prns)
+    cmdGFZRNX = '{prog:s} -stk_epo {interval:d} -finp {obs:s} -fout {prns:s}'.format(prog=dProgs['gfzrnx'], interval=dArgs['interval'], obs=dArgs['obs_name'], prns=prns_name)
     logger.info('{func:s}: Running:\n{cmd:s}'.format(func=cFuncName, cmd=colored(cmdGFZRNX, 'blue')))
 
     # run the program
@@ -50,7 +52,7 @@ def rnxobs_parse_prns(dArgs: dict, dProgs:dict, logger: logging.Logger) -> list:
     # extract the PRNs which are last elements in lines starting with STE
     lstPRNS = []
     logger.info('{func:s}: display of observation time span')
-    with open(file_prns) as f:
+    with open(prns_name) as f:
         for line in f:
             # print('{line:s} -- {STE!s}'.format(line=line, STE=line.startswith(' STE')))
             if line.startswith(' STE'):
@@ -60,7 +62,7 @@ def rnxobs_parse_prns(dArgs: dict, dProgs:dict, logger: logging.Logger) -> list:
     logger.info('{func:s}: list of PRNs with observations\n   {prns!s}'.format(prns=', '.join(lstPRNS), func=cFuncName))
 
     # remove the temporary json file
-    os.remove(file_prns)
+    os.remove(prns_name)
 
     return lstPRNS
 
