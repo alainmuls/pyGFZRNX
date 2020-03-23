@@ -107,7 +107,7 @@ def rnxobs_argument_parser(dobs_hdr: dict, dPRNs: dict, dArgs: dict, logger: log
             # get the frequencies for this GNSS
             # drnx_obs[gnss]['sysfrq'] = [freq for freq in dobs_hdr['file']['sysfrq'][gnss] if freq in dArgs['sysfrq']]
             # get the observation types for this GNSS
-            # drnx_obs[gnss]['systyp'] = [systyp for systyp in dobs_hdr['file']['systyp'][gnss] if systyp in dArgs['systyp']]
+            drnx_obs[gnss]['systyp'] = [systyp for systyp in dobs_hdr['file']['systyp'][gnss] if systyp in dArgs['systyp']]
 
             # get the observation codes for this GNSS
             drnx_obs[gnss]['sysobs'] = [sysobs for sysobs in dobs_hdr['file']['sysobs'][gnss] if sysobs[0] in dArgs['systyp'] and sysobs[1] in dArgs['sysfrq']]
