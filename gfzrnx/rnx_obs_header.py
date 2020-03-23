@@ -40,7 +40,7 @@ def rnxobs_parse_prns(dArgs: dict, dProgs:dict, logger: logging.Logger) -> list:
 
     file_prns = '/tmp/{rnx:s}.prns'.format(rnx=dArgs['obs_name'].replace('.', '_'))
 
-    cmdGFZRNX = '{prog:s} -stk_epo 300 -finp {obs:s} -fout {prns:s}'.format(prog=dProgs['gfzrnx'], obs=dArgs['obs_name'], prns=file_prns)
+    cmdGFZRNX = '{prog:s} -stk_epo {interval:d} -finp {obs:s} -fout {prns:s}'.format(prog=dProgs['gfzrnx'], interval=dArgs['interval'], obs=dArgs['obs_name'], prns=file_prns)
     logger.info('{func:s}: Running:\n{cmd:s}'.format(func=cFuncName, cmd=colored(cmdGFZRNX, 'blue')))
 
     # run the program

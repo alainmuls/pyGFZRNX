@@ -88,7 +88,7 @@ def treatCmdOpts(argv):
 
     args = parser.parse_args()
 
-    return args.obsRnx, args.dirRnx, args.logging
+    return args.obsRnx, args.dirRnx, args.interval, args.logging
 
 
 def checkArguments(logger: logging.Logger):
@@ -125,7 +125,7 @@ def main(argv):
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
     # treat command line options
-    obsRnx, dirRnx, logLevels = treatCmdOpts(argv)
+    obsRnx, dirRnx, interval, logLevels = treatCmdOpts(argv)
 
     # store cli parameters
     amc.dRTK = {}
@@ -135,6 +135,7 @@ def main(argv):
     dArgs = {}
     dArgs['dir'] = dirRnx
     dArgs['obs_name'] = obsRnx
+    dArgs['interval'] = interval
 
     amc.dRTK['args'] = dArgs
 
