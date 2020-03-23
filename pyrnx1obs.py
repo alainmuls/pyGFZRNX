@@ -170,10 +170,12 @@ def main(argv):
         for prn in amc.dRTK['analysed'][gnss]['prns']:
             logger.info('-' * 25)
             # create a dataframe from the rinex observation file
-            dfPRN = rnx_obs_analyse.rnxobs_dataframe(rnx_file=dArgs['obs_name'], prn=prn, dPRNObs=amc.dRTK['analysed'][gnss]['sysobs'], dProgs=amc.dRTK['progs'], logger=logger)
+            dfPRN = rnx_obs_analyse.rnxobs_dataframe(rnx_file=dArgs['obs_name'], prn=prn, dPRNSysObs=amc.dRTK['analysed'][gnss]['sysobs'], dProgs=amc.dRTK['progs'], logger=logger)
 
             # perform analysis calculations
-            rnx_obs_analyse.rnxobs_analyse(prn=prn, dfPrn=dfPRN, dPRNObs=amc.dRTK['analysed'][gnss]['systyp'], logger=logger)
+            rnx_obs_analyse.rnxobs_analyse(prn=prn, dfPrn=dfPRN, dPRNSysType=amc.dRTK['analysed'][gnss]['systyp'], logger=logger)
+
+    sys.exit(11)
 
     # show the information JSON structure
     logger.info('{func:s}: info dictionary = \n{prt!s}'.format(prt=amutils.pretty(amc.dRTK), func=cFuncName))
