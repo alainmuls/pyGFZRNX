@@ -10,13 +10,13 @@ import am_config as amc
 from ampyutils import  exeprogram, amutils
 
 
-def rnxobs_prn_obs(rnx_file: str, prn: str, dPRNObs: dict, dProgs:dict, logger: logging.Logger) -> dict:
+def rnxobs_dataframe(rnx_file: str, prn: str, dPRNObs: dict, dProgs:dict, logger: logging.Logger) -> dict:
     """
-    rnxobs_header_metadata reads the rinex observation file header and extracts info
+    rnxobs_dataframe selects the observations for a PRN and returns observation dataframe
     """
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
-    logger.info('{func:s}: analysing PRN {prn:s} observations {obs:s}'.format(prn=prn, obs=', '.join(dPRNObs), func=cFuncName))
+    logger.info('{func:s}: creating dataframe for PRN {prn:s} with observations {obs:s}'.format(prn=prn, obs=', '.join(dPRNObs), func=cFuncName))
 
     # create tabular output for this PRN
     tab_name = '/tmp/{tmpname:s}.tab'.format(tmpname=uuid.uuid4().hex)
@@ -61,3 +61,40 @@ def rnxobs_prn_obs(rnx_file: str, prn: str, dPRNObs: dict, dProgs:dict, logger: 
     os.remove(tab_name)
 
     return dfPrn
+
+
+def rnxobs_analyse(prn: str, dfPrn: pd.DataFrame, dPRNObs: dict, logger: logging.Logger):
+    """
+    rnxobs_analyse calculates differences between similar observations
+    """
+    cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
+
+    logger.info('{func:s}: analysing PRN {prn:s} observations {obs:s}'.format(prn=prn, obs=', '.join(dPRNObs), func=cFuncName))
+
+    # check for this PRN which observation types it has by checking the dataframe column names
+    col_observables = list(dfPrn)[5:]
+    print(col_observables)
+
+    print(dPRNObs)
+    print(type(dPRNObs))
+
+    for _, sigtyp in enumerate(dPRNObs):
+        # check whether for this PRN we have the current signal type (C,S,D,L)
+        print('sigtype = {!s}'.format(sigtyp))
+        prn_sigtyps = [prn_sigtyp for prn_sigtyp in col_observables if prn_sigtyp[0] == sigtyp]
+
+        print(prn_sigtyps)
+        # create col names for the possible differences
+        for i in range(len(prn_sigtyps)-1):
+            for j in range(i+1, len(prn_sigtyps)):
+                new_col = '{st1:s}-{st2:s}'.format(st1=prn_sigtyps[i], st2=prn_sigtyps[j])
+                print('{:d} {:d} newcol = {:s}'.format(i, j, new_col))
+
+                dfPrn[new_col] = dfPrn[prn_sigtyps[i]].sub(dfPrn[prn_sigtyps[j]])
+
+    amutils.logHeadTailDataFrame(logger=logger, callerName=cFuncName, df=dfPrn, dfName='{tab:s}'.format(tab='{prn:s} with observables = {obs!s}'.format(prn=prn, obs=', '.join(dPRNObs))))
+
+    # df1['Score_diff'] = df1['score1'].sub(df1['score2'], axis = 0)
+    # dfPrn
+
+    sys.exit(11)

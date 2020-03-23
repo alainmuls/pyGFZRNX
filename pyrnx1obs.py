@@ -54,10 +54,10 @@ class freq_action(argparse.Action):
 
 class interval_action(argparse.Action):
     def __call__(self, parser, namespace, interval, option_string=None):
-        if 120 <= interval <= 1800:
+        if 60 <= interval <= 1800:
             setattr(namespace, self.dest, interval)
         else:
-            raise argparse.ArgumentError(self, "interval must be in [120 .. 1800] seconds")
+            raise argparse.ArgumentError(self, "interval must be in [60 .. 1800] seconds")
 
 
 def treatCmdOpts(argv):
@@ -169,7 +169,11 @@ def main(argv):
 
         for prn in amc.dRTK['analysed'][gnss]['prns']:
             logger.info('-' * 25)
-            dfPRN = rnx_obs_analyse.rnxobs_prn_obs(rnx_file=dArgs['obs_name'], prn=prn, dPRNObs=amc.dRTK['analysed'][gnss]['sysobs'], dProgs=amc.dRTK['progs'], logger=logger)
+            # create a dataframe from the rinex observation file
+            dfPRN = rnx_obs_analyse.rnxobs_dataframe(rnx_file=dArgs['obs_name'], prn=prn, dPRNObs=amc.dRTK['analysed'][gnss]['sysobs'], dProgs=amc.dRTK['progs'], logger=logger)
+
+            # perform analysis calculations
+            rnx_obs_analyse.rnxobs_analyse(prn=prn, dfPrn=dfPRN, dPRNObs=amc.dRTK['analysed'][gnss]['systyp'], logger=logger)
 
     # show the information JSON structure
     logger.info('{func:s}: info dictionary = \n{prt!s}'.format(prt=amutils.pretty(amc.dRTK), func=cFuncName))
