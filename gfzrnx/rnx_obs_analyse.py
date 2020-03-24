@@ -12,9 +12,9 @@ from ampyutils import  exeprogram, amutils
 from GNSS import gpstime
 
 
-def datetime_from_date_time(date: str, time:str) -> datetime:
+def DT_from_DTstr(date: str, time:str) -> datetime:
     """
-    datetime_from_date_time converts drom date and time given in strings to a datetime python structure
+    DT_from_DTstr converts drom date and time given in strings to a datetime python structure
     """
     datetime_str = '{date:s} {hms:s}'.format(date=date, hms=time[:-1])
     print('DT = {!s}'.format(datetime_str))
@@ -74,34 +74,8 @@ def rnxobs_dataframe(rnx_file: str, prn: str, dPRNSysObs: dict, dProgs:dict, log
     # read the CSV created file into a panda dataframe
     dfPrn = pd.read_csv(tab_name, delimiter = ',')
     # add datetime columns
-    # dfPos['DT'] = dfPrn.apply(lambda x: gpstime.UTCFromWT(x['WNC'], x['TOW']), axis=1)
-    # datetime_str = '09/19/18 13:55:26'
-    date_time_str = '2018-06-29 08:15:27.243860'
-    date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S.%f')
-
-    print('DT = {!s}'.format(date_time_str))
-    print('DT = {!s}'.format(type(date_time_str)))
-    print('Date:', date_time_obj.date())
-    print('Time:', date_time_obj.time())
-    print('Date-time:', date_time_obj)
-
-    datetime_str = '{date:s} {hms:s}'.format(date=dfPrn['DATE'][0], hms=dfPrn['TIME'][0][:-1])
-    print('DT = {!s}'.format(datetime_str))
-    print('DT = {!s}'.format(type(datetime_str)))
-
-    try:
-        datetime_object = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S.%f')
-    except ValueError as ve:
-        print('ValueError Raised:', ve)
-
-    print('DT = {!s}'.format(datetime_object))
-    print('DT = {!s}'.format(type(datetime_object)))
-
-    datetime_str = '{date:s} {hms:s}'.format(date=dfPrn['DATE'][76], hms=dfPrn['TIME'][76][:-1])
-    datetime_object = datetime_from_date_time(date=dfPrn['DATE'][76], time=dfPrn['TIME'][76])
-    print('DT = {!s}'.format(datetime_object))
-    print('DT = {!s}'.format(type(datetime_object)))
-
+    sDT = dfPrn.apply(lambda x: DT_from_DTstr(x['DATE'], x['TIME']), axis=1)
+    dfPrn.insert(loc=4, column='DT', value=sDT)
 
     amutils.logHeadTailDataFrame(logger=logger, callerName=cFuncName, df=dfPrn, dfName='{tab:s}'.format(tab='{prn:s} with observables = {obs!s}'.format(prn=prn, obs=', '.join(dPRNSysObs))))
 
