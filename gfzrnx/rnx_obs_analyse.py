@@ -17,8 +17,6 @@ def DT_from_DTstr(date: str, time:str) -> datetime:
     DT_from_DTstr converts drom date and time given in strings to a datetime python structure
     """
     datetime_str = '{date:s} {hms:s}'.format(date=date, hms=time[:-1])
-    print('DT = {!s}'.format(datetime_str))
-    print('DT = {!s}'.format(type(datetime_str)))
 
     try:
         datetime_object = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S.%f')
@@ -85,9 +83,10 @@ def rnxobs_dataframe(rnx_file: str, prn: str, dPRNSysObs: dict, dProgs:dict, log
     return dfPrn
 
 
-def rnxobs_analyse(prn: str, dfPrn: pd.DataFrame, dPRNSysType: dict, logger: logging.Logger):
+def rnxobs_analyse(prn: str, dfPrn: pd.DataFrame, dPRNSysType: dict, logger: logging.Logger) -> list:
     """
-    rnxobs_analyse calculates differences between similar observations
+    rnxobs_analyse calculates differences between similar observations.
+    Returns the column names of all signals, inclding the differences
     """
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
@@ -98,16 +97,23 @@ def rnxobs_analyse(prn: str, dfPrn: pd.DataFrame, dPRNSysType: dict, logger: log
     col_observables = list(dfPrn)[5:]
     logger.info('{func:s}: PRN {prn:s} has observables {obs:s}'.format(prn=prn, obs=', '.join(col_observables), func=cFuncName))
 
+    # return all signals for all sigtyp inclding the differences
+    prn_sigtypobs = []
+
     for _, sigtyp in enumerate(dPRNSysType):
         # check whether for this PRN we have the current signal type (C,S,D,L)
         # print('sigtype = {!s}'.format(sigtyp))
         prn_sigtyps = [prn_sigtyp for prn_sigtyp in col_observables if prn_sigtyp[0] == sigtyp]
+
+        prn_sigtypobs += prn_sigtyps
 
         # create col names for the possible differences
         for i in range(len(prn_sigtyps)-1):
             for j in range(i+1, len(prn_sigtyps)):
                 new_col = '{st1:s}-{st2:s}'.format(st1=prn_sigtyps[i], st2=prn_sigtyps[j])
                 # print('{:d} {:d} newcol = {:s}'.format(i, j, new_col))
+
+                prn_sigtypobs.append(new_col)
 
                 dfPrn[new_col] = dfPrn[prn_sigtyps[i]].sub(dfPrn[prn_sigtyps[j]])
 
@@ -118,5 +124,5 @@ def rnxobs_analyse(prn: str, dfPrn: pd.DataFrame, dPRNSysType: dict, logger: log
     amutils.logHeadTailDataFrame(logger=logger, callerName=cFuncName, df=dfPrn, dfName='{tab:s}'.format(tab='{prn:s} with observables = {obs!s}'.format(prn=prn, obs=', '.join(dPRNSysType))))
 
     # df1['Score_diff'] = df1['score1'].sub(df1['score2'], axis = 0)
-    # dfPrn
+    return prn_sigtypobs
 

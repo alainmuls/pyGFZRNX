@@ -11,6 +11,7 @@ from json import encoder
 import am_config as amc
 from ampyutils import location, amutils
 from gfzrnx import rnx_obs_header, rnx_obs_analyse
+from plot import rnx_obs_plot
 
 __author__ = 'amuls'
 
@@ -172,8 +173,15 @@ def main(argv):
             # create a dataframe from the rinex observation file
             dfPRN = rnx_obs_analyse.rnxobs_dataframe(rnx_file=dArgs['obs_name'], prn=prn, dPRNSysObs=amc.dRTK['analysed'][gnss]['sysobs'], dProgs=amc.dRTK['progs'], logger=logger)
 
-            # perform analysis calculations
-            rnx_obs_analyse.rnxobs_analyse(prn=prn, dfPrn=dfPRN, dPRNSysType=amc.dRTK['analysed'][gnss]['systyp'], logger=logger)
+            # perform analysis calculations, returned is list of ALL possible observations
+            prn_sigobstyps = rnx_obs_analyse.rnxobs_analyse(prn=prn, dfPrn=dfPRN, dPRNSysType=amc.dRTK['analysed'][gnss]['systyp'], logger=logger)
+
+            for sigtyp in amc.dRTK['analysed'][gnss]['systyp']:
+                # plotting is done per sigtyp
+                prn_stobs = [stobs for stobs in prn_sigobstyps if stobs.startswith(sigtyp)]
+                cols = ['DT'] + prn_stobs
+                # plot the observables for this specific sigtyp
+                rnx_obs_plot.rnx_prsobs_plot(prn=prn, stobs=prn_stobs, dfPrn=dfPRN[cols], rawobs=amc.dRTK['analysed'][gnss]['sysobs'], logger=logger, showplot=True)
 
     sys.exit(11)
 
