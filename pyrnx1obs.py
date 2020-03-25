@@ -181,7 +181,7 @@ def main(argv):
                 prn_stobs = [stobs for stobs in prn_sigobstyps if stobs.startswith(sigtyp)]
                 cols = ['DT'] + prn_stobs
                 # plot the observables for this specific sigtyp
-                rnx_obs_plot.rnx_prsobs_plot(prn=prn, stobs=prn_stobs, dfPrn=dfPRN[cols], rawobs=amc.dRTK['analysed'][gnss]['sysobs'], logger=logger, showplot=True)
+                rnx_obs_plot.rnx_prsobs_plot(dArgs=amc.dRTK['args'], prn=prn, stobs=prn_stobs, dfPrn=dfPRN[cols], rawobs=amc.dRTK['analysed'][gnss]['sysobs'], logger=logger, showplot=True)
 
     sys.exit(11)
 
