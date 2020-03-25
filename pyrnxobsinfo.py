@@ -54,7 +54,7 @@ class freq_action(argparse.Action):
 
 class interval_action(argparse.Action):
     def __call__(self, parser, namespace, interval, option_string=None):
-        if 6à <= interval <= 1800:
+        if 60 <= interval <= 1800:
             setattr(namespace, self.dest, interval)
         else:
             raise argparse.ArgumentError(self, "interval must be in [6à .. 1800] seconds")
