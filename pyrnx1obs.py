@@ -5,8 +5,6 @@ import argparse
 import sys
 from termcolor import colored
 import logging
-import json
-from json import encoder
 
 import am_config as amc
 from ampyutils import location, amutils
@@ -14,6 +12,7 @@ from gfzrnx import rnx_obs_header, rnx_obs_analyse
 from plot import rnx_obs_plot
 
 __author__ = 'amuls'
+
 
 class prn_action(argparse.Action):
     def __call__(self, parser, namespace, PRNs, option_string=None):
@@ -34,7 +33,7 @@ class prn_action(argparse.Action):
 
 class logging_action(argparse.Action):
     def __call__(self, parser, namespace, log_actions, option_string=None):
-        choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET']
+        choices = ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET']
         for log_action in log_actions:
             if log_action not in choices:
                 raise argparse.ArgumentError(self, "log_actions must be in {!s}".format(choices))
@@ -185,6 +184,7 @@ def main(argv):
 
     # show the information JSON structure
     logger.info('{func:s}: info dictionary = \n{prt!s}'.format(prt=amutils.pretty(amc.dRTK), func=cFuncName))
+
 
 if __name__ == "__main__":
     main(sys.argv)
