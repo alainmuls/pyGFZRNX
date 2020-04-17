@@ -4,6 +4,7 @@ import logging
 from termcolor import colored
 import json
 import uuid
+import tempfile
 
 import am_config as amc
 from ampyutils import  exeprogram, amutils
@@ -16,7 +17,7 @@ def rnxobs_header_metadata(dArgs: dict, dProgs:dict, logger: logging.Logger) -> 
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
     # extract the header meta data into a json structure
-    json_name = '/tmp/{tmpname:s}.json'.format(tmpname=uuid.uuid4().hex)
+    json_name = os.path.join(tempfile.gettempdir(), '{tmpname:s}.json'.format(tmpname=uuid.uuid4().hex))
 
     cmdGFZRNX = '{prog:s} -meta basic:jsonp -finp {obs:s} -fout {json:s}'.format(prog=dProgs['gfzrnx'], obs=dArgs['obs_name'], json=json_name)
     logger.info('{func:s}: Running:\n{cmd:s}'.format(func=cFuncName, cmd=colored(cmdGFZRNX, 'blue')))
@@ -40,7 +41,7 @@ def rnxobs_parse_prns(dArgs: dict, dProgs:dict, logger: logging.Logger) -> list:
     """
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
-    prns_name = '/tmp/{tmpname:s}.prns'.format(tmpname=uuid.uuid4().hex)
+    prns_name = os.path.join(tempfile.gettempdir(), '{tmpname:s}.prns'.format(tmpname=uuid.uuid4().hex))
 
     cmdGFZRNX = '{prog:s} -stk_epo {interval:d} -finp {obs:s} -fout {prns:s}'.format(prog=dProgs['gfzrnx'], interval=dArgs['interval'], obs=dArgs['obs_name'], prns=prns_name)
     logger.info('{func:s}: Running:\n{cmd:s}'.format(func=cFuncName, cmd=colored(cmdGFZRNX, 'blue')))
@@ -51,7 +52,7 @@ def rnxobs_parse_prns(dArgs: dict, dProgs:dict, logger: logging.Logger) -> list:
 
     # extract the PRNs which are last elements in lines starting with STE
     lstPRNS = []
-    logger.info('{func:s}: display of observation time span')
+    logger.info('{func:s}: display of observation time span'.format(func=cFuncName))
     with open(prns_name) as f:
         for line in f:
             # print('{line:s} -- {STE!s}'.format(line=line, STE=line.startswith(' STE')))

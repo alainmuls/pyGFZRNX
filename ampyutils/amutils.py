@@ -370,3 +370,8 @@ def delete_lines(original_file: str, lst_line_number: list):
         os.rename(dummy_file, original_file)
     else:
         os.remove(dummy_file)
+
+
+def DT_convertor(o):
+    if isinstance(o, datetime):
+        return o.__str__()

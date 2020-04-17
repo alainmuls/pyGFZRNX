@@ -73,7 +73,7 @@ def treatCmdOpts(argv):
     parser = argparse.ArgumentParser(description=helpTxt)
 
     parser.add_argument('-r', '--obsRnx', help='rinex observation file', required=True, type=str)
-    parser.add_argument('-d', '--dirRnx', help='Directory of SBF file (default {:s})'.format(colored('./', 'green')), required=False, default='.', type=str)
+    parser.add_argument('-d', '--dirRnx', help='Directory of RINEX file (default {:s})'.format(colored('./', 'green')), required=False, default='.', type=str)
     parser.add_argument('-i', '--interval', help='interval in sec for scanning observation file (default {interval:s} s)'.format(interval=colored(600, 'green')), default=600, type=int, required=False, action=interval_action)
 
     # parser.add_argument('-o', '--obs_type', help='select observation types to plot (default {:s})'.format(colored('C', 'green')), default='C', choices=['C', 'S', 'D', 'L'], nargs='+', type=str)
@@ -99,8 +99,8 @@ def checkArguments(logger: logging.Logger):
 
     # change to the directory dirRnx if it exists
     workDir = os.getcwd()
-    if amc.dRTK['args']['dir'] != '.':
-        workDir = os.path.normpath(os.path.join(workDir, amc.dRTK['args']['dir']))
+    if amc.dRTK['args']['rinexDir'] != '.':
+        workDir = os.path.normpath(os.path.join(workDir, amc.dRTK['args']['rinexDir']))
     logger.info('{func:s}: working directory is {dir:s}'.format(func=cFuncName, dir=colored('{:s}'.format(workDir), 'green')))
 
     if not os.path.exists(workDir):
@@ -129,11 +129,8 @@ def main(argv):
 
     # store cli parameters
     amc.dRTK = {}
-    dInfo = {}
-    amc.dRTK['info'] = dInfo
-
     dArgs = {}
-    dArgs['dir'] = dirRnx
+    dArgs['rinexDir'] = dirRnx
     dArgs['obs_name'] = obsRnx
     dArgs['interval'] = interval
 
@@ -144,21 +141,26 @@ def main(argv):
     # locate the gfzrnx program used for execution
     dProgs = {}
     dProgs['gfzrnx'] = location.locateProg('gfzrnx', logger)
-    dProgs['grep'] = location.locateProg('grep', logger)
     amc.dRTK['progs'] = dProgs
 
     # check arguments
     checkArguments(logger=logger)
 
     # read the header info using gfzrnx
-    amc.dRTK['info']['header'] = rnx_obs_header.rnxobs_header_metadata(dArgs=amc.dRTK['args'], dProgs=amc.dRTK['progs'], logger=logger)
+    amc.dRTK['header'] = rnx_obs_header.rnxobs_header_metadata(dArgs=amc.dRTK['args'], dProgs=amc.dRTK['progs'], logger=logger)
     # get list of PRNs in RINEX obs file
-    amc.dRTK['info']['prns'] = rnx_obs_header.rnxobs_parse_prns(dArgs=amc.dRTK['args'], dProgs=amc.dRTK['progs'], logger=logger)
+    amc.dRTK['prns'] = rnx_obs_header.rnxobs_parse_prns(dArgs=amc.dRTK['args'], dProgs=amc.dRTK['progs'], logger=logger)
     # extract parts of the rinex observation header
-    rnx_obs_header.rnxobs_metadata_parser(dobs_hdr=amc.dRTK['info']['header'], dPRNs=amc.dRTK['info']['prns'], dArgs=amc.dRTK['args'], logger=logger)
+    rnx_obs_header.rnxobs_metadata_parser(dobs_hdr=amc.dRTK['header'], dPRNs=amc.dRTK['prns'], dArgs=amc.dRTK['args'], logger=logger)
 
     # show the information JSON structure
     logger.info('{func:s}: info dictionary = \n{prt!s}'.format(prt=amutils.pretty(amc.dRTK), func=cFuncName))
+    # store the json structure
+    jsonName = os.path.join(amc.dRTK['args']['rinexDir'], amc.dRTK['args']['obs_name'].replace('.', '-') + '.json')
+    print('jsonName {!s}'.format(jsonName))
+    with open(jsonName, 'w') as f:
+        json.dump(amc.dRTK, f, ensure_ascii=False, indent=4, default=amutils.DT_convertor)
+
 
 if __name__ == "__main__":
     main(sys.argv)

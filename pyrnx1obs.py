@@ -100,8 +100,8 @@ def checkArguments(logger: logging.Logger):
 
     # change to the directory dirRnx if it exists
     workDir = os.getcwd()
-    if amc.dRTK['args']['dir'] != '.':
-        workDir = os.path.normpath(os.path.join(workDir, amc.dRTK['args']['dir']))
+    if amc.dRTK['args']['rinexDir'] != '.':
+        workDir = os.path.normpath(os.path.join(workDir, amc.dRTK['args']['rinexDir']))
     logger.info('{func:s}: working directory is {dir:s}'.format(func=cFuncName, dir=colored('{:s}'.format(workDir), 'green')))
 
     if not os.path.exists(workDir):
@@ -130,11 +130,9 @@ def main(argv):
 
     # store cli parameters
     amc.dRTK = {}
-    dInfo = {}
-    amc.dRTK['info'] = dInfo
 
     dArgs = {}
-    dArgs['dir'] = dirRnx
+    dArgs['rinexDir'] = dirRnx
     dArgs['obs_name'] = obsRnx
     dArgs['gnss'] = sat_systs
     dArgs['systyp'] = obs_types

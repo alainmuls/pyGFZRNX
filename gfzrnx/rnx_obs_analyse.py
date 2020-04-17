@@ -35,7 +35,7 @@ def rnxobs_dataframe(rnx_file: str, prn: str, dPRNSysObs: dict, dProgs:dict, log
     logger.info('{func:s}: creating dataframe for PRN {prn:s} with observations {obs:s}'.format(prn=prn, obs=', '.join(dPRNSysObs), func=cFuncName))
 
     # create tabular output for this PRN
-    tab_name = '/tmp/{tmpname:s}.tab'.format(tmpname=uuid.uuid4().hex)
+    tab_name = os.path.join(tempfile.gettempdir(), '{tmpname:s}.tab'.format(tmpname=uuid.uuid4().hex))
 
     cmdGFZRNX = '{prog:s} -finp {rnx:s} -fout {out:s} -tab_obs -tab_sep "," -prn {prn:s} -obs_types={obs:s}'.format(prog=dProgs['gfzrnx'], rnx=rnx_file, out=tab_name, prn=prn, obs=','.join(dPRNSysObs))
 
