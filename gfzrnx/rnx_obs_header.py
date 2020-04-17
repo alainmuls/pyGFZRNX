@@ -6,11 +6,10 @@ import json
 import uuid
 import tempfile
 
-import am_config as amc
-from ampyutils import  exeprogram, amutils
+from ampyutils import exeprogram, amutils
 
 
-def rnxobs_header_metadata(dArgs: dict, dProgs:dict, logger: logging.Logger) -> dict:
+def rnxobs_header_metadata(dArgs: dict, dProgs: dict, logger: logging.Logger) -> dict:
     """
     rnxobs_header_metadata reads the rinex observation file header and extracts info
     """
@@ -35,7 +34,7 @@ def rnxobs_header_metadata(dArgs: dict, dProgs:dict, logger: logging.Logger) -> 
     return hdr_obs
 
 
-def rnxobs_parse_prns(dArgs: dict, dProgs:dict, logger: logging.Logger) -> list:
+def rnxobs_parse_prns(dArgs: dict, dProgs: dict, logger: logging.Logger) -> list:
     """
     rnxobs_parse_prns gets th elist of PRNs in observation file
     """
@@ -74,9 +73,6 @@ def rnxobs_metadata_parser(dobs_hdr: dict, dPRNs: dict, dArgs: dict, logger: log
     """
     cFuncName = colored(os.path.basename(__file__), 'yellow') + ' - ' + colored(sys._getframe().f_code.co_name, 'green')
 
-    # dictionary containing relevant info
-    drnx_obs = {}
-
     # get the GNSSs cavailable
     GNSSs = list(dobs_hdr['file']['satsys'])
     for gnss in GNSSs:
@@ -114,11 +110,11 @@ def rnxobs_argument_parser(dobs_hdr: dict, dPRNs: dict, dArgs: dict, logger: log
             drnx_obs[gnss]['sysobs'] = [sysobs for sysobs in dobs_hdr['file']['sysobs'][gnss] if sysobs[0] in dArgs['systyp'] and sysobs[1] in dArgs['sysfrq']]
 
             # create list of available PRNs with observables for this GNSS
-            prns_asked = ['{gnss:s}{prn:02d}'.format(gnss=gnss, prn=prn) for prn in range(1, 37) if prn in dArgs['prns'] ]
+            prns_asked = ['{gnss:s}{prn:02d}'.format(gnss=gnss, prn=prn) for prn in range(1, 37) if prn in dArgs['prns']]
             drnx_obs[gnss]['prns'] = [prn for prn in prns_asked if prn in dPRNs]
 
             # create info text to inform user what is available
-            txt_exam  = '\n   GNSS: {gnss:s}'.format(gnss=gnss)
+            txt_exam = '\n   GNSS: {gnss:s}'.format(gnss=gnss)
             # txt_exam += '\n      frequencies: {freq!s}'.format(freq=', '.join(drnx_obs[gnss]['sysfrq']))
             txt_exam += '\n      observation codes: {obs!s}'.format(obs=', '.join(drnx_obs[gnss]['sysobs']))
             txt_exam += '\n      PRNs: {prns!s}'.format(prns=', '.join(drnx_obs[gnss]['prns']))

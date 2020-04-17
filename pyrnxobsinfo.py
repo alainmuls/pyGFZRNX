@@ -6,13 +6,13 @@ import sys
 from termcolor import colored
 import logging
 import json
-from json import encoder
 
 import am_config as amc
 from ampyutils import location, amutils
-from gfzrnx import rnx_obs_header, rnx_obs_analyse
+from gfzrnx import rnx_obs_header
 
 __author__ = 'amuls'
+
 
 class prn_action(argparse.Action):
     def __call__(self, parser, namespace, PRNs, option_string=None):
@@ -33,7 +33,7 @@ class prn_action(argparse.Action):
 
 class logging_action(argparse.Action):
     def __call__(self, parser, namespace, log_actions, option_string=None):
-        choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET']
+        choices = ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET']
         for log_action in log_actions:
             if log_action not in choices:
                 raise argparse.ArgumentError(self, "log_actions must be in {!s}".format(choices))
@@ -80,7 +80,6 @@ def treatCmdOpts(argv):
     # parser.add_argument('-s', '--sat_syst', help='select GNNSs (default to {:s})'.format(colored('E', 'green')), default='E', choices=['E', 'G'], nargs='+', type=str)
     # parser.add_argument('-f', '--freqs', help='select frequency bands (default to {:s})'.format(colored('all', 'green')), default='all', nargs='+', action=freq_action)
     # parser.add_argument('-p', '--prn', help='select PRNs (default {:s})'.format(colored('all', 'green')), default='all', action=prn_action, nargs='+')
-
 
     parser.add_argument('-l', '--logging', help='specify logging level console/file (default {:s})'.format(colored('INFO DEBUG', 'green')), nargs=2, required=False, default=['INFO', 'DEBUG'], action=logging_action)
 
