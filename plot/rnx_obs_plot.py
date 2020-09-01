@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from matplotlib import dates
 import numpy as np
 import os
 import pandas as pd
@@ -7,7 +6,6 @@ import sys
 from termcolor import colored
 import logging
 
-import am_config as amc
 from ampyutils import amutils
 
 __author__ = 'amuls'
@@ -25,7 +23,7 @@ def rnx_prsobs_plot(dArgs: dict, prn: str, stobs: list, dfPrn: pd.DataFrame, raw
     elif stobs[0][0] == 'S':
         str_obs = 'Signal strength [dbHz]'
     elif stobs[0][0] == 'L':
-        strobs = 'Carrier waves [-]'
+        str_obs = 'Carrier waves [-]'
     elif stobs[0][0] == 'D':
         str_obs = 'Doppler frequency [Hz]'
 
@@ -34,7 +32,7 @@ def rnx_prsobs_plot(dArgs: dict, prn: str, stobs: list, dfPrn: pd.DataFrame, raw
 
     # determine the discrete colors for all observables
     colormap = plt.cm.tab20  # I suggest to use nipy_spectral, Set1, Paired
-    colors = [colormap(i) for i in np.linspace(0, 1, len(stobs)*2)]
+    colors = [colormap(i) for i in np.linspace(0, 1, len(stobs) * 2)]
     # print('colors = {!s}'.format(colors))
 
     fig, ax = plt.subplots(figsize=(18.0, 12.0))
@@ -43,7 +41,7 @@ def rnx_prsobs_plot(dArgs: dict, prn: str, stobs: list, dfPrn: pd.DataFrame, raw
     count = 0
     lstlabels = []  # store the label info
     for i, obs in enumerate([obs for obs in stobs if obs in rawobs]):
-        txt_label = ax.plot(dfPrn['DT'],dfPrn[obs], color=colors[i], marker='.', linestyle='-', markersize=3, label=obs, alpha=max(0.9-0.075*i, 0.25))
+        txt_label = ax.plot(dfPrn['DT'], dfPrn[obs], color=colors[i], marker='.', linestyle='-', markersize=3, label=obs, alpha=max(0.9 - 0.075 * i, 0.25))
         lstlabels += txt_label
         count += 1
 
@@ -53,7 +51,7 @@ def rnx_prsobs_plot(dArgs: dict, prn: str, stobs: list, dfPrn: pd.DataFrame, raw
     # print the difference in observables on second y axis
     ax2 = ax.twinx()
     for j, obs in enumerate([obs for obs in stobs if obs not in rawobs]):
-        txt_label = ax2.plot(dfPrn['DT'],dfPrn[obs], color=colors[count+j], marker='x', linestyle='-', markersize=3, label=obs, alpha=max(0.9-0.075*j, 0.25))
+        txt_label = ax2.plot(dfPrn['DT'], dfPrn[obs], color=colors[count + j], marker='x', linestyle='-', markersize=3, label=obs, alpha=max(0.9 - 0.075 * j, 0.25))
         lstlabels += txt_label
 
     ax2.set_ylabel('Difference of Signal Type: {:s}'.format(str_obs), fontsize='large')
